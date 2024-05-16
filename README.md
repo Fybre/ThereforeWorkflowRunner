@@ -10,8 +10,11 @@ The Web Front End is extemely basic as it was just designed to be functional, an
 
 ## Installation
 Most straightforward way to deploy is to use the docker image:
+
 `docker pull fybre/thereforeworkflowrunner`
+
 Sample extract from **docker-compose.yml**
+
  ```
 thereforeworkflowrunner:
     image: fybre/thereforeworkflowrunner:latest
