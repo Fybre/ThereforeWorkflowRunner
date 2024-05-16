@@ -113,17 +113,20 @@
                     header.insertCell().innerHTML = "<strong>Workflow No</strong>";
                     header.insertCell().innerHTML = "&nbsp;"
                     header.insertCell().innerHTML = "&nbsp;"
+                    header.insertCell().innerHTML = "&nbsp;"
 
                     if (jobListObj) {
                         jobListObj.forEach(item => {
                             let row = table.insertRow();
+                            row.className = (item.status == 1 ? "" : "table-secondary");
                             row.insertCell().innerHTML = item.jobName;
                             row.insertCell().innerHTML = item.tenant;
                             row.insertCell().innerHTML = (item.xeroWebHookKey) ? "Yes" : "No";
                             row.insertCell().innerHTML = item.cronSchedule;
                             row.insertCell().innerHTML = (item.nextRun) ? (new Date(Date.parse(item.nextRun + "Z")).toLocaleString('en-AU')) : "N/A";
                             row.insertCell().innerHTML = item.workflowNo;
-                            row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnEdit(" + item.id + ")\">Edit</button>";
+                            row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnPause(" + item.id + "," + item.status + ")\">" + (item.status==1?"Pause":"Resume") + "</button>";
+                            row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnEdit(" + item.id + ")\"> Edit</button>";
                             row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnDelete(" + item.id + ")\">Delete</button>";
                         });
                     }
@@ -131,6 +134,17 @@
                 addSpinner.className = "";
                 btnProcess.classList.remove("disabled");
             });
+        }
+
+        function btnPause(id, status) {
+            let authKey = document.getElementById("authkey").value;
+            sessionStorage.setItem("authkey", authKey);
+
+            let params = "id=" + id + "&status=" + (status == 1?2:1) + "&authkey=" + authKey;
+
+            processUpdateStatus(params);
+
+            location.reload();
         }
 
         function btnEdit(id)
@@ -153,6 +167,10 @@
             while (table.rows.length > 0) {table.deleteRow(0)};
 
             location.reload();
+        }
+
+        async function processUpdateStatus(params) {
+            return await processJobRESTCall("POST", "/setjobstatus?" + params);
         }
 
         async function processDeleteJob(params)

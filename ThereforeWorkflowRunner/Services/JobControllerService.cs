@@ -120,6 +120,14 @@ namespace ThereforeWorkflowRunner.Services
             var job = await GetJobAsync(authKey, id);
             if (job == null) {return null;}
             job.Status = status;
+            if (job.Status == JobStatus.active)
+            {
+                job.SetNextRun();
+            }
+            else
+            {
+                job.NextRun = null;
+            }
             await _db.SaveChangesAsync();
             return job.Status;
         }

@@ -88,7 +88,7 @@ app.MapGet("/getjobs", async (string? tenant, string authKey, JobControllerServi
     .WithName("GetJobs")
     .WithOpenApi();
 
-app.MapPost("/setjobstatus/{id}/{status}", async (int id, JobStatus status, string authKey, JobControllerService jc) =>
+app.MapPost("/setjobstatus", async (int id, JobStatus status, string authKey, JobControllerService jc) =>
 {
     app.Logger.LogInformation("ROUTE /setjobstatus Called");
     var res = await jc.SetJobStatus(authKey, id, status);
