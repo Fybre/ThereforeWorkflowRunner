@@ -27,7 +27,7 @@ thereforeworkflowrunner:
 ```
 Internal port used for web server is 8080, so map as appropriate.
 /app/Data contains the SQLite database, so can be mapped to a local volume if required. The database will be created if it doesn't exist.
-A users.json file in this directory will ensure user/auth key accounts are created in the database. Contents of this file as below:
+A **users.json** file in this directory will ensure user/auth key accounts are created in the database. Contents of this file are only read on startup.
 ```
 [
   {
