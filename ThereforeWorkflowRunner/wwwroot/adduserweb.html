@@ -1,0 +1,161 @@
+<html>
+
+<head>
+    <title>Therefore Workflow Runner - Add User</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="row">
+        <div class="card">
+            <div class="card-header"><a href="/"><img src="img/workflow.png" width="50" height="50" style="float: left; margin-right: 10px;"></a>
+                <h1 access="false" id="control-8157414">User</h1>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 ">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" access="false" id="username">
+                </div>
+                <div class="mb-3 ">
+                <select class="form-select" aria-label="Role" id="role">
+                    <option selected>Choose a role</option>
+                    <option value="0">Admin</option>
+                    <option value="1">User</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="usersauthkey" class="form-label">User's Auth Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="usersauthkey" access="false" id="usersauthkey" disabled>
+                        <button class="btn btn-outline-secondary" type="button" id="buttonCopy"
+                            onclick="function copy(){let v = document.getElementById('usersauthkey'); v.select(); navigator.clipboard.writeText(v.value); ; alert('Copied Auth key')};copy()">Copy</button>
+                    </div>
+                </div>
+                <div class="mb-3 ">
+                    <label for="authkey" class="form-label">Admin Auth Key</label>
+                    <input type="password" class="form-control" name="authkey" access="false" id="authkey"
+                        placeholder="Your authorisation key">
+                </div>
+                <hr>
+                <div class="mb-3 ">
+                    <button type="button" class="btn-primary btn" name="btnProcess" id="btnProcess" onclick="btnProcess()">
+                        <span role="status">Add</span>
+                        <span class="" aria-hidden="true" id="addSpinner"></span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade"  id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalTitle">Add User</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><span id="modalText"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+
+        function showModal(title, msg)
+        {
+            var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+            document.getElementById("modalText").innerHTML = msg;
+            document.getElementById("modalTitle").innerHTML = title;
+            statusModal.show();
+        }
+        
+
+        function btnProcess() {
+            const params = "username=" + document.getElementById("username").value +
+                            "&role=" + document.getElementById("role").value +
+                            "&authKey=" + document.getElementById("authkey").value;
+            let btnProcess = document.getElementById("btnProcess");
+            let addSpinner = document.getElementById("addSpinner");
+
+
+            addSpinner.className = "spinner-border spinner-border-sm";
+            btnProcess.classList.add("disabled");
+
+            processJob(params).then((processJobResult) =>
+            {
+                addSpinner.className = "";
+                btnProcess.classList.remove("disabled");
+
+                if (!processJobResult)
+                {
+                    showModal("ERROR", "Could not add user. Check Network and Auth Key");
+                }
+                else
+                {
+                    const jobResultObj = JSON.parse(processJobResult);
+                    showModal("SUCCESS", "Added user");
+                    document.getElementById("usersauthkey").value = jobResultObj.authKey;
+                }
+                addSpinner.className = "";
+                btnProcess.classList.remove("disabled");
+            });
+
+        }
+
+        async function processJob(params)
+        {        
+            return await processJobRESTCall("POST", "/adduser?" + params );
+        }
+
+        async function processJobRESTCall(method, endPoint, content)
+        {
+            let res = false;
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify(content);
+
+            const requestOptions = {
+                method: method,
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+            };
+            try 
+            {
+                const response = await fetch(endPoint, requestOptions);
+                const result = await response.text();
+                if (response.ok)
+                {
+                    console.log("Result OK");
+                    return result;
+                }
+                else
+                {
+                    console.log("Result Fail");
+                    return false;
+                }
+            }
+            catch (error)
+            {
+                console.error("Exception: ", error);      
+                return false;         
+            }
+        }
+    </script>
+</body>
+
+</html>

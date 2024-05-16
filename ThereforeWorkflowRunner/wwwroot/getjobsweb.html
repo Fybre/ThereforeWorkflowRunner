@@ -1,0 +1,206 @@
+<html>
+
+<head>
+    <title>Therefore Workflow Runner - Get Jobs</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="row">
+        <div class="card">
+            <div class="card-header"><a href="/"><img src="img/workflow.png" width="50" height="50" style="float: left; margin-right: 10px;"></a>
+                <h1 access="false" id="control-8157414">Job List</h1>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 ">
+                    <label for="authkey" class="form-label">Auth Key</label>
+                    <input type="password" class="form-control" name="authkey" access="false" id="authkey"
+                        placeholder="Your authorisation key">
+                </div>
+
+                <div class="mb-3 ">
+                    <button type="button" class="btn-primary btn" name="btnProcess" id="btnProcess" onclick="btnProcess()">
+                        <span role="status">List</span>
+                        <span class="" aria-hidden="true" id="addSpinner"></span>
+                    </button>
+                </div>
+
+                <div>
+                    <table id="jobTable" class="table">
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade"  id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalTitle">Add User</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><span id="modalText"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+    </script>
+
+    <script>
+        
+        window.onload = function() {
+            let authKey = sessionStorage.getItem("authkey");
+            if (authKey) {
+                document.getElementById("authkey").value = authKey;
+                getJobsList();
+            }
+        }
+
+        function showModal(title, msg)
+        {
+            var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+            document.getElementById("modalText").innerHTML = msg;
+            document.getElementById("modalTitle").innerHTML = title;
+            statusModal.show();
+        }
+        
+        function btnProcess()
+        {
+            getJobsList();
+        }
+
+        function getJobsList() {
+            let authKey = document.getElementById("authkey").value;
+            let btnProcess = document.getElementById("btnProcess");
+            let addSpinner = document.getElementById("addSpinner");
+            let table = document.getElementById("jobTable");
+            while (table.rows.length > 0) {table.deleteRow(0)};
+
+            addSpinner.className = "spinner-border spinner-border-sm";
+            btnProcess.classList.add("disabled");
+            let params = "authkey=" + authKey;
+            processGetJobs(params).then((processJobResult) =>
+            {
+                addSpinner.className = "";
+                btnProcess.classList.remove("disabled");
+
+                if (!processJobResult)
+                {
+                    showModal("ERROR", "Could not retrieve user list. Check Network and Auth Key");
+                }
+                else
+                {
+                    const jobListObj = JSON.parse(processJobResult);
+                    let header = table.insertRow();
+                    header.insertCell().innerHTML= "<strong>Name</strong>";
+                    header.insertCell(). innerHTML = "<strong>Tenant</strong>";
+                    header.insertCell().innerHTML = "<strong>Xero Webhook</strong>";
+                    header.insertCell().innerHTML= "<strong>Cron</strong>";
+                    header.insertCell(). innerHTML = "<strong>Next Run</strong>";
+                    header.insertCell().innerHTML = "<strong>Workflow No</strong>";
+                    header.insertCell().innerHTML = "&nbsp;"
+                    header.insertCell().innerHTML = "&nbsp;"
+
+                    if (jobListObj) {
+                        jobListObj.forEach(item => {
+                            let row = table.insertRow();
+                            row.insertCell().innerHTML = item.jobName;
+                            row.insertCell().innerHTML = item.tenant;
+                            row.insertCell().innerHTML = (item.xeroWebHookKey) ? "Yes" : "No";
+                            row.insertCell().innerHTML = item.cronSchedule;
+                            row.insertCell().innerHTML = (item.nextRun) ? (new Date(Date.parse(item.nextRun + "Z")).toLocaleString('en-AU')) : "N/A";
+                            row.insertCell().innerHTML = item.workflowNo;
+                            row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnEdit(" + item.id + ")\">Edit</button>";
+                            row.insertCell().innerHTML = "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"btnDelete(" + item.id + ")\">Delete</button>";
+                        });
+                    }
+                }
+                addSpinner.className = "";
+                btnProcess.classList.remove("disabled");
+            });
+        }
+
+        function btnEdit(id)
+        {
+            let authKey = document.getElementById("authkey").value;
+            let params = "id=" + id + "&authkey=" + authKey;
+            window.location.href = "/addjobweb?" + params;
+        }
+
+        function btnDelete(id)
+        {
+            confirm("Confirm to delete");
+            let authKey = document.getElementById("authkey").value;
+            sessionStorage.setItem("authkey", authKey);
+            let params = "authKey=" + authKey + "&id=" + id;
+
+            processDeleteJob(params);
+
+            let table = document.getElementById("jobTable").getElementsByTagName('tbody')[0];
+            while (table.rows.length > 0) {table.deleteRow(0)};
+
+            location.reload();
+        }
+
+        async function processDeleteJob(params)
+        {        
+            return await processJobRESTCall("DELETE", "/deletejob?" + params );
+        }
+
+        async function processGetJobs(params)
+        {        
+            return await processJobRESTCall("GET", "/getjobs?" + params );
+        }
+
+        async function processJobRESTCall(method, endPoint, content)
+        {
+            let res = false;
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify(content);
+
+            const requestOptions = {
+                method: method,
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+            };
+            try 
+            {
+                const response = await fetch(endPoint, requestOptions);
+                const result = await response.text();
+                if (response.ok)
+                {
+                    console.log("Result OK");
+                    return result;
+                }
+                else
+                {
+                    console.log("Result Fail");
+                    return false;
+                }
+            }
+            catch (error)
+            {
+                console.error("Exception: ", error);      
+                return false;         
+            }
+        }
+    </script>
+</body>
+
+</html>

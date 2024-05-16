@@ -1,0 +1,294 @@
+<html>
+
+<head>
+    <title>Therefore Workflow Runner - Add Job</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <input type="hidden" id="jobId" name="jobId">
+
+    <div class="row">
+        <div class="card">
+            <div class="card-header">
+                <a href="/"><img src="img/workflow.png" width="50" height="50" style="float: left; margin-right: 10px;"></a>
+                <h1 access="false" id="control-8157414">Workflow Job</h1>
+            </div>
+            <div class="card-body">
+
+                <div class="mb-3 ">
+                    <label for="jobname">Name</label>
+                    <input type="text" class="form-control" id="jobname" required>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Trigger Type</h5><p>Timer and/or Webhook can be used to trigger the Therefore workflow.</p>
+                        <p><strong>Timer</strong> will run the Therefore workflow indefinitely at a specified interval, 
+                        <strong>Xero Webhook</strong> will only run the workflow when a notification is received from Xero.</p>
+                    </div>
+                    <div class="card-body ">
+                        <div class="mb-3 ">
+                            <h5>Timer</h5>
+                            <label for="cronschedule" class="form-label">Cron Schedule</label>&nbsp;
+
+                            <p>Enter the cron expression for repeating the workflow. <a href="https://tools.fybre.me/crontab-generator" target="_blank">[Cron validator]</a></p>
+                            <input type="text" placeholder="*/5 * * * *" class="form-control" name="cronschedule"
+                                   access="false" id="cronschedule" title="Schedule in cron format">
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="scheduleIANATimeZone">Scheduling Timezone</label>
+                            <p>Timezone for when the cron schedule should be applicable, in IANA format (Country/City)</p>
+                            <input type="text" placeholder="Australia/Sydney" class="form-control"
+                                   name="scheduleIANATimeZone" access="false" id="scheduleIANATimeZone" required>
+                        </div>
+                        <h5>Xero Webhook</h5>
+                        <div class="mb-3 ">
+                            Steps:<br />
+                            <ol>
+                                <li>Choose the applicable App from the <a href="https://developer.xero.com/app/manage">Xero Apps</a> page. At least one application must be enabled for the Xero tenant.</li>
+                                <li>From the Webhooks tab, specify which changes to be notified for (eg Contacts and/or Invoices). </li>
+                                <li>Enter the following for the Delivery URL: <strong><label id="lblwebhooklocation"></label></strong></li>
+                                <li>Copy the Webhooks key provided, and paste it below in the Xero Webhook Key input area.</li>
+                                <li>Complete and submit this Workflow Job configuration.</li>
+                                <li>From the Xero Apps page initiate the 'Intent to recieve' process. The status should then change to OK.</li>
+                            </ol>
+                            <script>document.getElementById("lblwebhooklocation").innerHTML = window.location.origin + "/xerowebhook";</script>
+                            <label for="xerowebhookkey" class="form-label">Xero Webhook Key</label>
+                            <input type="text" class="form-control" name="xerowebhookkey" access="false"
+                                   id="xerowebhookkey" title="Xero Webhook Key" placeholder="Enter the Webhooks key for the app here">
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Therefore details</h5>
+                        <p>Therefore Tenant details, Authentication type (can be BASIC or BEARER), Category and Workflow details</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 ">
+                            <label for="tenant">Therefore Tenant</label>
+                            <input type="text" placeholder="tenant" class="form-control" name="tenant" access="false"
+                                   id="tenant" required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="thereforeurl">Therefore URL</label>
+                            <input type="text" placeholder="https://tenant.thereforeonline.com" class="form-control"
+                                   name="thereforeurl" access="false" id="thereforeurl" required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="thereforeauth" class="form-label">Therefore Auth</label>&nbsp;
+                            <a href="https://tools.fybre.me/basic-auth-generator" target="_blank">[Basic auth generator]</a>
+                            <input type="text" placeholder="BASIC XXXXXXXX" class="form-control" name="thereforeauth"
+                                   access="false" id="thereforeauth" title="Authentication (Basic or Bearer) to use" required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="categoryno" class="formbuilder-number-label">Category No</label>
+                            <input type="number" class="form-control" name="categoryno" access="false" min="1"
+                                   max="1000" id="categoryno" placeholder="Category no" required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="workflowno" class="formbuilder-number-label">Workflow No</label>
+                            <input type="number" class="form-control" name="workflowno" access="false" min="1"
+                                   max="1000" id="workflowno" placeholder="Workflow number to start" required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="fieldno">Field No - A search field is required for the API calls</label>
+                            <input type="number" class="form-control" name="fieldno" access="false" min="1" max="10000"
+                                   id="fieldno" placeholder="Field No to perform search on." required>
+                        </div>
+                        <div class="mb-3 ">
+                            <label for="fieldcondition" class="form-label">Field Condition</label>
+                            <input type="text" class="form-control" name="fieldcondition" access="false"
+                                   id="fieldcondition"
+                                   placeholder="Condition when searching this field. Default is blank.">
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <div class="mb-3 ">
+                    <label for="authkey" class="form-label">Your Auth Key - This must be provided for all API calls</label>
+                    <input type="password" class="form-control" name="authkey" access="false" id="authkey"
+                           placeholder="Your authorisation key to add/view workflow jobs">
+                </div>
+                <hr>
+                <div class="mb-3 ">
+                    <p>NOTE: On submission, a request to run the workflow will be sent to Therefore in order to check the settings.</p>
+                    <button type="submit" class="btn-primary btn" name="btnProcess" id="btnProcess" onclick="btnProcess()">
+                        <span role="status" id="buttonAddText">Add</span>
+                        <span class="" aria-hidden="true" id="addSpinner"></span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Job</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><span id="modalText"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <script>
+        window.onload = function () {
+            console.log("onload");
+            if (findGetParameter("id") && findGetParameter("authkey")) {
+                getJob(findGetParameter("authkey"), findGetParameter("id"));
+            }
+        }
+
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            var items = location.search.substr(1).split("&");
+            for (var index = 0; index < items.length; index++) {
+                tmp = items[index].split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            }
+            return result;
+        }
+
+        function showModal(title, msg) {
+            var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+            document.getElementById("modalText").innerHTML = msg;
+            document.getElementById("modalTitle").innerHTML = title;
+            statusModal.show();
+        }
+
+
+        function btnProcess() {
+            let btnProcess = document.getElementById("btnProcess");
+            let addSpinner = document.getElementById("addSpinner");
+            console.log("pressed");
+            console.log(btnProcess, addSpinner);
+            addSpinner.className = "spinner-border spinner-border-sm";
+            btnProcess.classList.add("disabled");
+
+            processJob().then((processJobResult) => {
+                addSpinner.className = "";
+                btnProcess.classList.remove("disabled");
+                console.log("ProcessJobResult: ", processJobResult);
+                switch (processJobResult) {
+                    case 0:
+                        showModal("ERROR", "Could not run Therefore workflow.<br>Check network, authorisation and Therefore settings.");
+                        break;
+                    case 1:
+                        showModal("Success", "Job added");
+                        break;
+                    case 2:
+                        showModal("ERROR", "Could not add job. Check cron schedule (if used)");
+                        break;
+                }
+            });
+
+        }
+
+        async function processJob() {
+            let jobres = 0;
+            let jobId = document.getElementById("jobId").value;
+            let obj =
+            {
+                "jobName": document.getElementById("jobname").value,
+                "cronSchedule": document.getElementById("cronschedule").value ?? "",
+                "scheduleIANATimeZone": document.getElementById("scheduleIANATimeZone").value,
+                "tenant": document.getElementById("tenant").value,
+                "thereforeURL": document.getElementById("thereforeurl").value,
+                "thereforeAuth": document.getElementById("thereforeauth").value,
+                "workflowNo": document.getElementById("workflowno").value,
+                "categoryNo": document.getElementById("categoryno").value,
+                "fieldNo": document.getElementById("fieldno").value,
+                "fieldCondition": document.getElementById("fieldcondition").value ?? "",
+                "xeroWebHookKey": document.getElementById("xerowebhookkey").value ?? "",
+                "status": 1,
+                "authKey": document.getElementById("authkey").value
+            }
+            let runJobResult = await processJobRESTCall("POST", "/runcustomjob", obj);
+            if (runJobResult) {
+                const method = (jobId) ? "PUT" : "POST";
+                const endpoint = (jobId) ? "/updatejob?id=" + jobId + "&authKey=" + obj.authKey : "/addjob";
+                let addJobResult = await processJobRESTCall(method, endpoint, obj);
+                if (addJobResult) { jobres = 1; } else { jobres = 2; }
+            }
+            return jobres;
+        }
+
+        async function getJob(authKey, id) {
+            let params = "id=" + id + "&authKey=" + authKey;
+            let jobResult = await processJobRESTCall("GET", "/getjob?" + params);
+            let j = JSON.parse(jobResult);
+
+            if (!j) {
+                showModal("ERROR", "Could not load job details");
+                return;
+            }
+
+            document.getElementById("jobId").value = j.id;
+            document.getElementById("jobname").value = j.jobName;
+            document.getElementById("cronschedule").value = j.cronSchedule;
+            document.getElementById("scheduleIANATimeZone").value = j.scheduleIANATimeZone;
+            document.getElementById("tenant").value = j.tenant;
+            document.getElementById("thereforeurl").value = j.thereforeURL;
+            document.getElementById("thereforeauth").value = j.thereforeAuth;
+            document.getElementById("workflowno").value = j.workflowNo;
+            document.getElementById("categoryno").value = j.categoryNo;
+            document.getElementById("fieldno").value = j.fieldNo;
+            document.getElementById("fieldcondition").value = j.fieldCondition;
+            document.getElementById("xerowebhookkey").value = j.xeroWebHookKey;
+            document.getElementById("buttonAddText").innerHTML = "Update";
+            document.getElementById("authkey").value = authKey;
+        }
+
+        async function processJobRESTCall(method, endPoint, content) {
+            let res = false;
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify(content);
+
+            const requestOptions = {
+                method: method,
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+            };
+            try {
+                const response = await fetch(endPoint, requestOptions);
+                const result = await response.text();
+                if (response.ok) {
+                    console.log("Result OK");
+                    //return true
+                    return result;
+                }
+                else {
+                    console.log("Result Fail");
+                    return false;
+                }
+            }
+            catch (error) {
+                console.error("Exception: ", error);
+                return false;
+            }
+        }
+    </script>
+</body>
+
+</html>

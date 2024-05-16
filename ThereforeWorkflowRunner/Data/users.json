@@ -1,0 +1,12 @@
+[
+  {
+    "Name": "Admin",
+    "AuthKey": "Password to Add",
+    "Role": 0
+  },
+    {
+    "Name": "User1",
+    "AuthKey": "Another Password",
+    "Role": 1
+  }
+]
